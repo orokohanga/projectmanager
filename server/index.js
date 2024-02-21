@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-
+const bcrypt = require('bcrypt')
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -15,11 +15,14 @@ app.get('/users', async (req, res) => {
 });
 
 app.post('/user', async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
   const user = await prisma.user.create({
     data: {
       name,
       email,
+      password:hash
     },
   });
   res.json(user);
