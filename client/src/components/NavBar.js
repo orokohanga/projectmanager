@@ -4,7 +4,10 @@ import useCookie from "react-use-cookie"
 
 export default function NavBar() {
   const [token, setToken] = useCookie("token", "0")
-
+  function logout() {
+    localStorage.clear()
+    setToken("0")
+  }
   console.log(token)
   return (
     <header className='flex gap-4 justify-center bg-slate-800 text-white h-14 items-center'>
@@ -18,7 +21,9 @@ export default function NavBar() {
         (
           <>
             <p>{window.localStorage.getItem('name')}</p>
-            <button onClick={() => setToken("0")}>Logout</button>
+            <NavLink to='/myprojects'>My projects</NavLink>
+            <NavLink to='/project/create'>Create a project</NavLink>
+            <button onClick={logout}>Logout</button>
           </>
         )
       }

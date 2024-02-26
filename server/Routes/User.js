@@ -5,6 +5,18 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 const router = express.Router();
 
+export const verifyToken = (req, res, next) => {
+    const bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== "undefined") {
+        const bearer = bearerHeader.split(" ");
+        const token = bearer[1];
+        req.token = token;
+        next();
+    } else {
+        res.sendStatus(403);
+    }
+}
+
 router.get("/users", async (req, res) => {
     const users = await prisma.user.findMany();
     res.json(users);
