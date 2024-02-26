@@ -15,6 +15,28 @@ app.get("/users", async (req, res) => {
   res.json(users);
 });
 
+app.get("/user/:id", async (req, res) => {
+  const id = req.params.id;
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id,
+    },
+    include: { projectOwned: true, contributor: true }
+  })
+  .then((data) => {
+    if (!data.projectOwned) {
+      data.projectOwned = [];
+    }
+    if (!data.contributor) {
+      data.contributor = [];
+    }
+    res.json(data);
+  })
+  .catch((error) => {
+    res.json({ error: error.message });
+  }); 
+});
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -78,13 +100,11 @@ app.put("/user/:id", async (req, res) => {
 });
 
 app.post("/project", async (req, res) => {
-  const { title, description, ownerId } = req.body;
+  const { name, ownerId } = req.body;
   const newProject = await prisma.project.create({
     data: {
-      title,
-      description,
-      ownerId,
-      contributorsId: ownerId,
+      name,
+      ownerId
     },
   });
   res.json(newProject);
@@ -92,7 +112,7 @@ app.post("/project", async (req, res) => {
 
 app.put("/project/:id/join/", async (req, res) => {
   const id = req.params.id;
-  const updatedProject = await prisma.project.update({where: { id: parseInt(id) },data: req.body});
+  const updatedProject = await prisma.project.update({where: { id: id },data: req.body});
   res.json(updatedProject);
 });
 

@@ -6,27 +6,60 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  name     String    @unique
-  password String
-  projectOwned  Project[] @relation("ProjectOwner")
-  projectContributor Project[] @relation("ProjectContributors")
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  email        String        @unique
+  name         String        @unique
+  password     String
+  projectOwned Project[]     @relation("ProjectOwner")
+  contributor  Contributor[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  owner       User     @relation("ProjectOwner",fields: [ownerId], references: [id])
-  ownerId     Int
-  contributors User    @relation("ProjectContributors",fields: [contributorsId], references: [id])
-  contributorsId Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  owner        User          @relation("ProjectOwner", fields: [ownerId], references: [id])
+  ownerId      String        @map("ownerId") @db.ObjectId
+  contributors Contributor[]
+  tasks        Task[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
+
+model Contributor {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @map("userId") @db.ObjectId
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String   @map("projectId") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  taskType    TaskType[]
+  project     Project    @relation(fields: [projectId], references: [id])
+  projectId   String     @map("projectId") @db.ObjectId
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model TaskType {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String   @map("taskId") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
