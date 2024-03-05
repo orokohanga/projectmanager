@@ -7,6 +7,7 @@ import SignleProject from './SingleProject'
 export default function UserProject() {
     const [token, setToken] = useCookie("token", "0")
     const [projectowner, setProjectOwner] = useState([])
+    const [projectfollowed, setProjectFollowed] = useState([])
 
     useEffect(() => {
         async function getProjectOwner() {
@@ -22,8 +23,24 @@ export default function UserProject() {
             }
         }
         getProjectOwner()
-    }, [token])
+    }, [token],)
 
+    useEffect(() => {
+        async function getProjectFollowed() {
+            try {
+                const response = await axios.get('http://localhost:3001/project/contributed/' + window.localStorage.getItem('userID'), {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                console.log(response.data)
+                setProjectFollowed(response.data)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        getProjectFollowed()
+    }, [token],)
 
 
     return (
@@ -32,16 +49,16 @@ export default function UserProject() {
             <div className='flex flex-col gap-8 justify-center w-3/4'>
                 {projectowner.map((project) => {
                     return (
-                        <SignleProject key={project._id} name={project.name} owner={window.localStorage.getItem('name')} />
+                        <SignleProject key={project._id} name={project.name} owner={window.localStorage.getItem('name')} contributors={project.contributors} /> 
                     )
                 })}
             </div>
             
             <h1 className='text-3xl font-bold text-white text-center'>Projects Followed</h1>
             <div className='flex flex-col gap-8 justify-center w-3/4'>
-                {projectowner.map((project) => {
+                {projectfollowed.map((project) => {
                     return (
-                        <SignleProject key={project._id} name={project.name} owner={window.localStorage.getItem('name')} />
+                        <SignleProject key={project._id} name={project.name} owner={project.owner.name} contributors={project.contributors}/>
                     )
                 })}
             </div>
